@@ -15,10 +15,9 @@ import (
 )
 
 var (
-	bot *linebot.Client
-	err error
-
-	lineID map[string]string
+	bot    *linebot.Client
+	err    error
+	lineID = make(map[string]string)
 )
 
 func main() {
@@ -26,6 +25,7 @@ func main() {
 		os.Getenv("CHANNEL_SECRET"),
 		os.Getenv("CHANNEL_TOKEN"),
 	)
+
 	if err != nil {
 		log.Fatal(err)
 	}
