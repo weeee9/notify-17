@@ -52,8 +52,11 @@ func main() {
 
 func pushMsg(c *gin.Context) {
 	var messages []linebot.SendingMessage
-
-	hour, minute, _ := time.Now().Clock()
+	taipeiZone, err := time.LoadLocation("Asia/Taipei")
+	if err != nil {
+		log.Printf(" [linebot] timezone err: %v\n", err.Error())
+	}
+	hour, minute, _ := time.Now().In(taipeiZone).Clock()
 	nowtime := fmt.Sprintf("%02v:%02v", hour, minute)
 	messages = append(messages, linebot.NewTextMessage("現在時刻 - "+nowtime))
 
