@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,9 +16,10 @@ import (
 )
 
 var (
-	bot    *linebot.Client
-	err    error
-	lineID = make(map[string]string)
+	bot          *linebot.Client
+	err          error
+	lineID       = make(map[string]string)
+	mentionTimes = 0
 )
 
 func main() {
@@ -44,13 +46,14 @@ func main() {
 	})
 
 	router.POST("/callback", callback)
-	router.POST("/testpush", pushMsg)
+	router.POST("/testpush", notify)
 
 	cron.Start()
 	router.Run(":" + port)
 }
 
-func pushMsg(c *gin.Context) {
+// notify send time string when it's xx:17
+func notify(c *gin.Context) {
 	var messages []linebot.SendingMessage
 	taipeiZone, err := time.LoadLocation("Asia/Taipei")
 	if err != nil {
@@ -85,6 +88,23 @@ func callback(c *gin.Context) {
 				log.Printf(" [linebot] join a new group, ID: %v\n", groupID)
 				lineID[groupID] = groupID
 			}
+		}
+
+		if event.Type == linebot.EventTypeMessage {
+			switch message := event.Message.(type) {
+			case *linebot.TextMessage:
+				if strings.Contains(message.Text, "17") {
+					mentionTimes++
+					var msg *linebot.TextMessage
+					if mentionTimes == 1 {
+						msg = linebot.NewTextMessage("17 出現了第 1 次")
+					} else {
+						msg = linebot.NewTextMessage("17 又出現了第 "+ mentionTImes+" 次")
+					}
+					if err := bot.PushMessage(groupID, msg).Do(); err != nil {
+						log.Printf(" [linebot] error: %v\n", err.Error())
+					}
+				}
 		}
 	}
 
