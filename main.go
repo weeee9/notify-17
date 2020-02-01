@@ -17,10 +17,9 @@ import (
 )
 
 var (
-	bot          *linebot.Client
-	err          error
-	lineID       = make(map[string]string)
-	mentionTimes = 0
+	bot    *linebot.Client
+	err    error
+	lineID = make(map[string]int)
 )
 
 func main() {
@@ -64,9 +63,8 @@ func notify(c *gin.Context) {
 	nowtime := fmt.Sprintf("%02v:%02v", hour, minute)
 	messages = append(messages, linebot.NewTextMessage("現在時刻 - "+nowtime))
 
-	for _, id := range lineID {
-		_, err := bot.PushMessage(id, messages...).Do()
-		if err != nil {
+	for id := range lineID {
+		if _, err := bot.PushMessage(id, messages...).Do(); err != nil {
 			log.Printf(" [linebot] error: %v\n", err.Error())
 		}
 	}
@@ -87,20 +85,20 @@ func callback(c *gin.Context) {
 		if groupID != "" {
 			if _, ok := lineID[groupID]; !ok {
 				log.Printf(" [linebot] join a new group, ID: %v\n", groupID)
-				lineID[groupID] = groupID
+				lineID[groupID] = 0
 			}
 		}
 
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				if strings.Contains(message.Text, "17") {
-					mentionTimes++
+				if strings.Contains(message.Text, "17") || strings.Contains(message.Text, "一七") {
+					lineID[groupID]++
 					var msg *linebot.TextMessage
-					if mentionTimes == 1 {
+					if lineID[groupID] == 1 {
 						msg = linebot.NewTextMessage("17 出現了第 1 次")
 					} else {
-						str := strconv.Itoa(mentionTimes)
+						str := strconv.Itoa(lineID[groupID])
 						msg = linebot.NewTextMessage("17 又出現了第 " + str + " 次")
 					}
 					if _, err := bot.PushMessage(groupID, msg).Do(); err != nil {
