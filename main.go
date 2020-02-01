@@ -99,13 +99,13 @@ func callback(c *gin.Context) {
 					if mentionTimes == 1 {
 						msg = linebot.NewTextMessage("17 出現了第 1 次")
 					} else {
-						msg = linebot.NewTextMessage("17 又出現了第 "+ mentionTImes+" 次")
+						msg = linebot.NewTextMessage("17 又出現了第 " + string(mentionTimes) + " 次")
 					}
-					if err := bot.PushMessage(groupID, msg).Do(); err != nil {
+					if _, err := bot.PushMessage(groupID, msg).Do(); err != nil {
 						log.Printf(" [linebot] error: %v\n", err.Error())
 					}
 				}
+			}
 		}
 	}
-
 }
