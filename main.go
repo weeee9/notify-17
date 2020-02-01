@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -99,8 +100,8 @@ func callback(c *gin.Context) {
 					if mentionTimes == 1 {
 						msg = linebot.NewTextMessage("17 出現了第 1 次")
 					} else {
-						17str := strconv.Itoa(mentionTimes)
-						msg = linebot.NewTextMessage("17 又出現了第 " + 17str + " 次")
+						str := strconv.Itoa(mentionTimes)
+						msg = linebot.NewTextMessage("17 又出現了第 " + str + " 次")
 					}
 					if _, err := bot.PushMessage(groupID, msg).Do(); err != nil {
 						log.Printf(" [linebot] error: %v\n", err.Error())
