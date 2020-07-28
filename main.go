@@ -48,6 +48,13 @@ func main() {
 	router.POST("/callback", callback)
 	router.POST("/testpush", notify)
 
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "pong",
+		})
+	})
+
 	cron.Start()
 	router.Run(":" + port)
 }
